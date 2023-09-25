@@ -1,12 +1,17 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 import CanvasLoader from "../Loader";
 
-const Computers = ({ isMobile }) => {
-  
-  const computer = useGLTF("./desktop_pc/scene.gltf");
-  
+const Computers = ({ isMobile, onModelLoaded }) => {
+  const { scene, nodes, materials } = useGLTF("./desktop_pc/scene.gltf");
+
+  useEffect(() => {
+    if (scene) {
+      console.log("Scene is loaded. Triggering onModelLoaded...");
+      onModelLoaded();
+    }
+  }, [scene, onModelLoaded]);
 
 
   return (
@@ -23,7 +28,7 @@ const Computers = ({ isMobile }) => {
       <pointLight intensity={2} color="white" />
       <primitive
         
-        object={computer.scene}
+        object={scene}
         scale={isMobile ? 0.7 : 0.75}
         position={isMobile ? [0, -3, -2.2] : [0, -3.25, -1.5]}
       />
@@ -31,7 +36,7 @@ const Computers = ({ isMobile }) => {
   );
 };
 
-const ComputersCanvas = () => {
+const ComputersCanvas = ({ onModelLoaded }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -69,7 +74,7 @@ const ComputersCanvas = () => {
         maxPolarAngle={Math.PI}
         minPolarAngle={0}
       />
-        <Computers isMobile={isMobile} />
+        <Computers isMobile={isMobile} onModelLoaded={onModelLoaded} />
       </Suspense>
       <Preload all />
     </Canvas>
