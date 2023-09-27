@@ -5,15 +5,15 @@ import { useState, useEffect} from "react";
 
 import React from "react";
 
-const useTypewriter = (text, duration = 500) => {
+const useTypewriter = (text, duration = 6000, speedFactor = 1.5) => {
   const [typedText, setTypedText] = useState("");
   const [isCursorVisible, setCursorVisible] = useState(true);
 
   useEffect(() => {
     let i = 0;
-    const delay = duration / text.length;
-    const cursorTimer = setInterval(() => setCursorVisible(prev => !prev), 500);
-  
+    const avgDelay = duration / text.length;
+    const cursorTimer = setInterval(() => setCursorVisible((prev) => !prev), 500);
+
     const type = () => {
       if (i < text.length) {
         setTypedText(text.slice(0, i + 1));
@@ -21,24 +21,34 @@ const useTypewriter = (text, duration = 500) => {
       }
     };
 
-    const typingInterval = setInterval(type, delay);
+    const typing = () => {
+      type();
+      const randomDelay = avgDelay + (Math.random()) * avgDelay / 2; // Add randomness to delay
+      const adjustedDelay = randomDelay / speedFactor;
+      setTimeout(typing, adjustedDelay);
+    };
+
+    typing();  // Kick off the typing
 
     return () => {
-      clearInterval(typingInterval);
       clearInterval(cursorTimer);
     };
-  }, [text, duration]);
+  }, [text, duration, speedFactor]);
 
   return [typedText, isCursorVisible];
 };
+
 
 const Hero = () => {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [typedText, isCursorVisible] = useTypewriter(
     modelLoaded
       ? "I'm an indie maker and software developer working on projects that make life easier or a bit more fun."
-      : ""
+      : "",
+    6000,
+    1  // Adjust this value to change speed
   );
+  
 
   useEffect(() => {
     console.log('Model loaded:', modelLoaded);
